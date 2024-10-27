@@ -70,6 +70,75 @@
 
     <script>
 
+document.addEventListener('DOMContentLoaded', () => {
+        const selectMoeda = document.getElementById('moeda');
+        selectMoeda.addEventListener('change', updateTableValues);
+
+        // Chama updateTableValues ao carregar a página
+        updateTableValues();
+    });
+
+    async function updateTableValues() {
+        const moedaSelecionada = document.getElementById('moeda').value;
+        const budget = getBudget();
+        const expenses = getExpenses();
+
+        // Calcula o total das despesas em sua moeda de origem
+        let totalExpenses = expenses.reduce((acc, exp) => acc + exp.valor, 0);
+
+        // Converte o orçamento e as despesas para a moeda selecionada
+        const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
+        const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
+
+        // Calcula o saldo
+        const balance = budgetConverted - expensesConverted;
+
+        // Atualiza a tabela com os valores convertidos
+        document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
+        document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
+        document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
+    }
+
+    // Função para obter o orçamento do localStorage
+    function getBudget() {
+        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+        return budgets[0] || { valor: 0, moeda: "BRL" };  // Retorna o primeiro budget ou um default
+    }
+
+    // Função para obter as despesas do localStorage
+    function getExpenses() {
+        return JSON.parse(localStorage.getItem('expenses')) || [];
+    }
+
+    // Função fictícia de conversão de moeda
+    async function convertCurrency(amount, fromCurrency, toCurrency) {
+    if (fromCurrency === toCurrency) return amount;
+
+    const apiKey = 'edf7dd9bb7db93759e243c91'; 
+    const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.result === "success") {
+            const rate = data.conversion_rates[toCurrency];
+            if (rate) {
+                return amount * rate;
+            } else {
+                console.error(`A moeda de destino ${toCurrency} não foi encontrada nas taxas de câmbio.`);
+                return amount; // Retorna o valor original se a moeda não for encontrada
+            }
+        } else {
+            console.error("Erro na resposta da API ExchangeRate-API:", data);
+            return amount; // Retorna o valor original em caso de erro
+        }
+    } catch (error) {
+        console.error("Erro ao buscar as taxas de câmbio:", error);
+        return amount; // Retorna o valor original em caso de erro
+    }
+}
+
         function getExpensesFromLocalStorage() {
             const expenses = localStorage.getItem("expenses");
             return expenses ? JSON.parse(expenses) : [];
