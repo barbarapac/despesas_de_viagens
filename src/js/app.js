@@ -14,26 +14,6 @@ function getExpensesFromLocalStorage() {
     return expenses ? JSON.parse(expenses) : [];
 }
 
-function renderCards() {
-    const container = document.getElementById("cards-container");
-    container.innerHTML = "";
-
-    const expensesList = getExpensesFromLocalStorage();
-
-    if (expensesList.length === 0) {
-        container.innerHTML = '<p>Nenhuma despesa registrada.</p>';
-        return;
-    }
-
-    expensesList.forEach(item => {
-        const card = createCardTemplate(item);
-        container.innerHTML += card;
-    });
-
-    addCardInteractions();
-}
-
-
 
 function displayBudgets() {
     const budgetsUl = document.getElementById('budgets-ul');
@@ -73,7 +53,13 @@ function createCardTemplate(item) {
 
 
 
-function createCardDetails(item) {
+async function createCardDetails(item) {
+    // Calcula o valor total da despesa (quantidade * valor unitário)
+    const totalAmount = item.quantidade * item.valor;
+
+    // Converte o valor total para a moeda de destino
+    const convertedTotal = await convertCurrency(totalAmount, item.moedaOrigem, item.moedaDestino);
+
     return `
       <label><strong>Valor:</strong> ${item?.valor?.toFixed(2).replace(".", ",")} ${item.moedaOrigem}</label>
       <label><strong>Categoria:</strong> ${item.categoria}</label>
@@ -91,10 +77,70 @@ function createCardDetails(item) {
           </div>
         </div>
         <div class="col-6 d-flex justify-content-end">
-          <strong>Total: </strong>${item.quantidade * item.valor} ${item.moedaDestino}
+          <strong>Total: </strong>${convertedTotal.toFixed(2)} ${item.moedaDestino}
         </div>
       </div>
     `;
+}
+
+// Atualização da função renderCards para lidar com a função assíncrona createCardDetails
+async function renderCards() {
+    const container = document.getElementById("cards-container");
+    container.innerHTML = "";
+
+    const expensesList = getExpenses();
+
+    if (expensesList.length === 0) {
+        container.innerHTML = '<p>Nenhuma despesa registrada.</p>';
+        return;
+    }
+
+    for (const item of expensesList) {
+        const cardDetails = await createCardDetails(item);
+        const cardTemplate = `
+          <div class="card show" id="card-${item.id}" style="width: 100%; max-width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label style="font-size: larger;"><strong>${item.descricao}</strong></label>
+                  <div class="d-inline-flex align-items-top">
+                      <button class="btn btn-primary" onclick="editExpense('${item.id}')" title="Editar item">Editar</button>
+                      <button class="btn btn-danger" onclick="deleteExpense('${item.id}')" title="Deletar item">Deletar</button>
+                  </div>
+              </div>
+              <div class="divider"></div>
+              ${cardDetails}
+          </div>
+        `;
+        container.innerHTML += cardTemplate;
+    }
+}
+
+// Função para converter a moeda usando a API ExchangeRate-API
+async function convertCurrency(amount, fromCurrency, toCurrency) {
+    if (fromCurrency === toCurrency) return amount;
+
+    const apiKey = 'edf7dd9bb7db93759e243c91'; 
+    const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.result === "success") {
+            const rate = data.conversion_rates[toCurrency];
+            if (rate) {
+                return amount * rate;
+            } else {
+                console.error(`A moeda de destino ${toCurrency} não foi encontrada nas taxas de câmbio.`);
+                return amount; // Retorna o valor original se a moeda não for encontrada
+            }
+        } else {
+            console.error("Erro na resposta da API ExchangeRate-API:", data);
+            return amount; // Retorna o valor original em caso de erro
+        }
+    } catch (error) {
+        console.error("Erro ao buscar as taxas de câmbio:", error);
+        return amount; // Retorna o valor original em caso de erro
+    }
 }
 
 

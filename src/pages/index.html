@@ -16,16 +16,20 @@
     <div class="container">
         <div class="expenses-list-wrapper">
             <div style="margin-bottom: 10px; width: 100%; display: flex; align-items: center; gap: 10px;">
-                <button style="width: 150px; background-color: red; color: white;"
-                    onclick="window.location.href='new-expense.html'" class="purchase--btn">Nova Despesa</button>
                 <button style="width: 150px; background-color: green; color: white;"
-                    onclick="window.location.href='new-budget.html'" class="purchase--btn">Novo Budget</button>
+                    onclick="window.location.href='new-budget.html'" class="purchase--btn">Budget</button>
+                    <button 
+                    style="width: 150px; background-color: red; color: white;" 
+                    onclick="checkBudgetBeforeRedirect()" 
+                    class="purchase--btn">Nova Despesa
+                </button>
+                
 
                 <div class="input_container" style="margin-top: 0;">
                     <label for="moeda" class="input_label">Moeda de Visualização:</label>
                     <select id="moeda" class="input_field" name="moeda" required>
                         <option value="">Selecione a moeda visualização</option>
-                        <option value="BRL">Real (BRL)</option>
+                        <option value="BRL" selected>Real (BRL)</option>
                         <option value="USD">Dólar Americano (USD)</option>
                         <option value="EUR">Euro (EUR)</option>
                         <option value="GBP">Libra Esterlina (GBP)</option>
@@ -35,9 +39,9 @@
             <table class="table table-dark">
                 <thead>
                     <tr>
-                        <th scope="col">Total Budget</th>
-                        <th scope="col">Total Expenses</th>
-                        <th scope="col">Balance</th>
+                        <th scope="col">Budget</th>
+                        <th scope="col">Despesas Totais</th>
+                        <th scope="col">Balanço</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,11 +59,6 @@
                             <div class="container">
                                 <div id="cards-container"></div>
                             </div>
-
-                            <h2 style="margin-bottom: 30px;">Budgets cadastrados</h1>
-                                <div id="budget-list" class="mt-4">
-                                    <ul id="budgets-ul" class="list-group"></ul>
-                                </div>
                     </div>
                 </div>
             </div>
@@ -70,6 +69,18 @@
 
     <script>
 
+function checkBudgetBeforeRedirect() {
+        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+        
+        if (budgets.length > 0) {
+            // Se existe um budget, permite a navegação para a página de nova despesa
+            window.location.href = 'new-expense.html';
+        } else {
+            // Caso contrário, exibe uma mensagem pedindo para cadastrar um budget
+            alert("Por favor, cadastre um orçamento antes de adicionar uma nova despesa.");
+        }
+    }
+
 document.addEventListener('DOMContentLoaded', () => {
         const selectMoeda = document.getElementById('moeda');
         selectMoeda.addEventListener('change', updateTableValues);
@@ -79,25 +90,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function updateTableValues() {
-        const moedaSelecionada = document.getElementById('moeda').value;
-        const budget = getBudget();
-        const expenses = getExpenses();
+    const moedaSelecionada = document.getElementById('moeda').value;
+    const budget = getBudget();
+    const expenses = getExpenses();
 
-        // Calcula o total das despesas em sua moeda de origem
-        let totalExpenses = expenses.reduce((acc, exp) => acc + exp.valor, 0);
+    // Calcula o total das despesas, multiplicando o valor de cada despesa pela sua quantidade
+    let totalExpenses = expenses.reduce((acc, exp) => acc + (exp.valor * exp.quantidade), 0);
 
-        // Converte o orçamento e as despesas para a moeda selecionada
-        const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
-        const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
+    // Converte o orçamento e as despesas para a moeda selecionada
+    const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
+    const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
 
-        // Calcula o saldo
-        const balance = budgetConverted - expensesConverted;
+    // Calcula o saldo
+    const balance = budgetConverted - expensesConverted;
 
-        // Atualiza a tabela com os valores convertidos
-        document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
-        document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
-        document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
-    }
+    // Atualiza a tabela com os valores convertidos
+    document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
+    document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
+    document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
+}
+
 
     // Função para obter o orçamento do localStorage
     function getBudget() {
