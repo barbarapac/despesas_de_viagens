@@ -15,7 +15,6 @@
     <div id="notification" class="notification"></div>
     <div class="container">
         <div class="form-wrapper">
-            <!-- Removido o form -->
             <h2>Cadastrar Despesas</h2>
             <p>Organize suas despesas de forma simples e eficiente. Cadastre suas despesas e tenha mais controle e
                 tranquilidade durante sua aventura.</p>
@@ -87,79 +86,85 @@
     </div>
 
     <script>
-
-document.addEventListener("DOMContentLoaded", () => {
-    const expenseToEdit = JSON.parse(localStorage.getItem('edit')); // Carrega a despesa armazenada
-
-    if (expenseToEdit) {
-        setFormData(expenseToEdit);  // Preenche o formulário com os dados da despesa
-        document.getElementById('submit').innerText = 'Editar Despesa';  // Atualiza o texto do botão para "Editar Despesa"
-    }
-});
-
-// Função para preencher o formulário com os dados da despesa
-function setFormData(expense) {
-    document.getElementById('title').value = expense.title;
-    document.getElementById('quantity').value = expense.quantity;
-    document.getElementById('value').value = expense.value;
-    document.getElementById('date').value = expense.date;
-    document.getElementById('currencyOfOrigin').value = expense.currencyOfOrigin;
-    document.getElementById('currencyToConvert').value = expense.currencyToConvert;
-    document.getElementById('category').value = expense.category;
-}
-function cadastrarDespesa() {
-    const descricao = document.getElementById('title').value;
-    const quantidade = document.getElementById('quantity').value;
-    const valor = document.getElementById('value').value;
-    const data = document.getElementById('date').value;
-    const moedaOrigem = document.getElementById('currencyOfOrigin').value;
-    const moedaDestino = document.getElementById('currencyToConvert').value;
-    const categoria = document.getElementById('category').value;
-
-    // Validação para verificar se os campos estão preenchidos
-    if (!descricao || !quantidade || !valor || !data || !moedaOrigem || !moedaDestino || !categoria) {
-        alert("Por favor, preencha todos os campos.");
-        console.log("Campos não preenchidos:", { descricao, quantidade, valor, data, moedaOrigem, moedaDestino, categoria });
-        return;
-    }
-
-    // Cria um objeto para a nova despesa
-    const novaDespesa = {
-        descricao,
-        quantidade: parseInt(quantidade),
-        valor: parseFloat(valor),
-        data,
-        moedaOrigem,
-        moedaDestino,
-        categoria
-    };
-
-    console.log("Nova despesa criada:", novaDespesa);  // Verifica a estrutura da nova despesa
-
-    // Recupera as despesas já salvas no localStorage ou cria uma nova lista se não houver nenhuma
-    let despesas = JSON.parse(localStorage.getItem('expenses')) || [];
-    console.log("Despesas atuais no localStorage:", despesas);  // Verifica o conteúdo atual no localStorage
-
-    // Adiciona a nova despesa à lista
-    despesas.push(novaDespesa);
-    console.log("Lista de despesas atualizada:", despesas);  // Verifica a lista de despesas após a adição
-
-    // Salva a lista atualizada no localStorage
-    localStorage.setItem('expenses', JSON.stringify(despesas));
-    console.log("Despesas salvas no localStorage com sucesso.");
-
-    // Limpa os campos de entrada
-    document.getElementById('title').value = '';
-    document.getElementById('quantity').value = '';
-    document.getElementById('value').value = '';
-    document.getElementById('date').value = '';
-    document.getElementById('currencyOfOrigin').value = '';
-    document.getElementById('currencyToConvert').value = '';
-    document.getElementById('category').value = '';
-    window.location.href = 'index.html';
-
-}
-</script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const expenseToEdit = JSON.parse(localStorage.getItem('edit'));
+            if (expenseToEdit) {
+                setFormData(expenseToEdit);
+                document.getElementById('submit').innerText = 'Editar Despesa';
+            }
+        });
+    
+        // Função para preencher o formulário com os dados da despesa a ser editada
+        function setFormData(expense) {
+            document.getElementById('title').value = expense.descricao;
+            document.getElementById('quantity').value = expense.quantidade;
+            document.getElementById('value').value = expense.valor;
+            document.getElementById('date').value = expense.data;
+            document.getElementById('currencyOfOrigin').value = expense.moedaOrigem;
+            document.getElementById('currencyToConvert').value = expense.moedaDestino;
+            document.getElementById('category').value = expense.categoria;
+        }
+    
+        function cadastrarDespesa() {
+            const descricao = document.getElementById('title').value;
+            const quantidade = document.getElementById('quantity').value;
+            const valor = document.getElementById('value').value;
+            const data = document.getElementById('date').value;
+            const moedaOrigem = document.getElementById('currencyOfOrigin').value;
+            const moedaDestino = document.getElementById('currencyToConvert').value;
+            const categoria = document.getElementById('category').value;
+    
+            if (!descricao || !quantidade || !valor || !data || !moedaOrigem || !moedaDestino || !categoria) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+    
+            // Verifica se estamos no modo de edição
+            const expenseToEdit = JSON.parse(localStorage.getItem('edit'));
+            let despesas = JSON.parse(localStorage.getItem('expenses')) || [];
+    
+            if (expenseToEdit) {
+                // Atualiza a despesa existente
+                despesas = despesas.map(exp => exp.id === expenseToEdit.id ? 
+                    { ...expenseToEdit, descricao, quantidade: parseInt(quantidade), valor: parseFloat(valor), data, moedaOrigem, moedaDestino, categoria } 
+                    : exp
+                );
+                localStorage.removeItem('edit');  // Limpa o modo de edição
+                console.log("Despesa editada com sucesso:", despesas);
+            } else {
+                // Adiciona uma nova despesa
+                const novaDespesa = {
+                    id: Date.now(),
+                    descricao,
+                    quantidade: parseInt(quantidade),
+                    valor: parseFloat(valor),
+                    data,
+                    moedaOrigem,
+                    moedaDestino,
+                    categoria
+                };
+                despesas.push(novaDespesa);
+                console.log("Nova despesa criada:", novaDespesa);
+            }
+    
+            // Salva a lista atualizada no localStorage
+            localStorage.setItem('expenses', JSON.stringify(despesas));
+            console.log("Despesas salvas no localStorage com sucesso.");
+    
+            // Limpa os campos do formulário
+            document.getElementById('title').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('value').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('currencyOfOrigin').value = '';
+            document.getElementById('currencyToConvert').value = '';
+            document.getElementById('category').value = '';
+    
+            // Redireciona para index.html após o cadastro ou edição
+            window.location.href = 'index.html';
+        }
+    </script>
+    
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

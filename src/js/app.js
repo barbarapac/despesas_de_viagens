@@ -11,7 +11,6 @@ function removeExpenseFromLocalStorage(id) {
 
 function getExpensesFromLocalStorage() {
     const expenses = localStorage.getItem("expenses");
-    console.log("Dados no localStorage:", expenses); // Verifica o que está armazenado no localStorage
     return expenses ? JSON.parse(expenses) : [];
 }
 
@@ -20,7 +19,6 @@ function renderCards() {
     container.innerHTML = "";
 
     const expensesList = getExpensesFromLocalStorage();
-    console.log("Lista de despesas carregada:", expensesList); // Verifica a lista de despesas recuperada
 
     if (expensesList.length === 0) {
         container.innerHTML = '<p>Nenhuma despesa registrada.</p>';
@@ -29,29 +27,12 @@ function renderCards() {
 
     expensesList.forEach(item => {
         const card = createCardTemplate(item);
-        console.log("Template do card criado para o item:", item, card); // Verifica o template do card criado
         container.innerHTML += card;
     });
 
     addCardInteractions();
-    console.log("Renderização concluída."); // Confirma que a renderização foi concluída
 }
 
-function createCardTemplate(item) {
-    return `
-        <div class="card show" id="card-${item.id}" style="width: 100%; max-width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: larger;"><strong>${item.descricao}</strong></label>
-                <div class="d-inline-flex align-items-top">
-                    ${createLottieButton('edit', item.id, '/assets/jsons/edit-animation.json', 'Editar item')}
-                    ${createLottieButton('delete', item.id, '/assets/jsons/delete-animation.json', 'Deletar item')}
-                </div>
-            </div>
-            <div class="divider"></div>
-            ${createCardDetails(item)}
-        </div>
-    `;
-}
 
 
 function displayBudgets() {
@@ -68,8 +49,31 @@ function displayBudgets() {
     });
 }
 
+function createCardTemplate(item) {
+
+    console.log(item)
+    return `
+        <div class="card show" id="card-${item.id}" style="width: 100%; max-width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: larger;"><strong>${item.descricao}</strong></label>
+                <div class="d-inline-flex align-items-top">
+                    <button class="btn btn-primary" onclick="editExpense('${item.id}')" title="Editar item">Editar</button>
+                    <button class="btn btn-danger" onclick="deleteExpense('${item.id}')" title="Deletar item">Deletar</button>
+                </div>
+            </div>
+            <div class="divider"></div>
+            ${createCardDetails(item)}
+        </div>
+    `;
+}
+
+// Função para editar a despesa
+
+// Função para deletar a despesa
+
+
+
 function createCardDetails(item) {
-    console.log("item", item)
     return `
       <label><strong>Valor:</strong> ${item?.valor?.toFixed(2).replace(".", ",")} ${item.moedaOrigem}</label>
       <label><strong>Categoria:</strong> ${item.categoria}</label>
@@ -93,41 +97,7 @@ function createCardDetails(item) {
     `;
 }
 
-function editExpense(id) {
-    const expensesList = getExpensesFromLocalStorage();
-    const expense = expensesList.find(expense => expense.id == id);
 
-    if (expense) {
-        localStorage.setItem('edit', JSON.stringify(expense));  
-        window.location.href = 'new-expense.html'; 
-    }
-}
-
-function deleteExpense(id) {
-    if (confirm("Você tem certeza que deseja remover esta despesa?")) {
-        animateRemoval(id); 
-    }
-}
-
-function createLottieButton(action, id, src, tooltipText) {
-    const onclickAction = action === 'edit' 
-        ? `onclick="editExpense('${id}')"` 
-        : `onclick="deleteExpense('${id}')"`;
-    
-    return `
-        <div class="lottie-container" ${onclickAction}>
-            <lottie-player 
-                src="${src}"
-                background="transparent"
-                speed="1"
-                style="width: 50px; height: 50px;"
-                hover
-                data-id="${action}-${id}"
-            ></lottie-player>
-            <span class="tooltiptext">${tooltipText}</span>
-        </div>
-    `;
-}
 
 function addCardInteractions() {
     document.querySelectorAll("lottie-player").forEach(player => {
