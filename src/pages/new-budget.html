@@ -65,25 +65,35 @@
     <script>
         document.getElementById('form').addEventListener('submit', function (e) {
             e.preventDefault();
-
+    
+            // Verifica se já existe um budget no localStorage
+            let budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+            
+            if (budgets.length > 0) {
+                alert("Você só pode cadastrar um orçamento.");
+                return;
+            }
+    
+            // Captura os valores do formulário
             const descricao = document.getElementById('title').value;
             const valor = parseFloat(document.getElementById('value').value);
             const moeda = document.getElementById('moeda').value;
-
+    
+            // Cria o objeto budget
             const budget = { descricao, valor, moeda };
-
-            let budgets = JSON.parse(localStorage.getItem('budgets')) || [];
-            
+    
+            // Adiciona o budget ao localStorage
             budgets.push(budget);
-
             localStorage.setItem('budgets', JSON.stringify(budgets));
-
+    
+            // Limpa o formulário e redireciona
             document.getElementById('form').reset();
-            window.location.href='index.html'
+            window.location.href = 'index.html';
         });
-
+    
         document.addEventListener('DOMContentLoaded', displayBudgets);
     </script>
+    
 </body>
 
 </html>
