@@ -21,10 +21,9 @@ export function renderCards() {
 
   addCardInteractions();
 }
-
 function createCardTemplate(item) {
   return `
-    <div class="card show" id="card-${item.id}">
+    <div class="card show" id="card-${item.id}" style="width: 100%; max-width: 100%;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <label style="font-size: larger;"><strong>${item.title}</strong></label>
         <div class="d-inline-flex align-items-top">
@@ -37,6 +36,22 @@ function createCardTemplate(item) {
     </div>
   `;
 }
+
+function displayBudgets() {
+  const budgetsUl = document.getElementById('budgets-ul');
+  budgetsUl.innerHTML = '';
+
+  const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+
+  budgets.forEach((budget, index) => {
+      const li = document.createElement('li');
+      li.classList.add('list-group-item');
+      li.textContent = `${budget.descricao} - ${budget.valor.toFixed(2)} ${budget.moeda}`;
+      budgetsUl.appendChild(li);
+  });
+}
+
+displayBudgets()
 
 function createCardDetails(item) {
   return `

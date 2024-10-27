@@ -20,10 +20,10 @@ document.getElementById('form').addEventListener('submit', async function (event
 
         localStorage.removeItem('edit');
         document.getElementById('submit').innerText = 'Cadastrar Despesa';
-        showNotification(`${expense.title} editado com sucesso!`);
+        window.location.href='index.html'
     } else {
         expenseStorageManager.addExpense(expense);
-        showNotification(`${expense.title} adicionado com sucesso!`);
+        window.location.href='index.html'
     }
 
     this.reset();
