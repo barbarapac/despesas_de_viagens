@@ -18,12 +18,10 @@
             <div style="margin-bottom: 10px; width: 100%; display: flex; align-items: center; gap: 10px;">
                 <button style="width: 150px; background-color: green; color: white;"
                     onclick="window.location.href='new-budget.html'" class="purchase--btn">Budget</button>
-                    <button 
-                    style="width: 150px; background-color: red; color: white;" 
-                    onclick="checkBudgetBeforeRedirect()" 
+                <button style="width: 150px; background-color: red; color: white;" onclick="checkBudgetBeforeRedirect()"
                     class="purchase--btn">Nova Despesa
                 </button>
-                
+
 
                 <div class="input_container" style="margin-top: 0;">
                     <label for="moeda" class="input_label">Moeda de Visualização:</label>
@@ -52,6 +50,7 @@
                     </tr>
                 </tbody>
             </table>
+
             <div class="card" style="width: 100%;">
                 <div class="card-body">
                     <div id="form" class="expenses-center">
@@ -69,87 +68,87 @@
 
     <script>
 
-function checkBudgetBeforeRedirect() {
-        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
-        
-        if (budgets.length > 0) {
-            // Se existe um budget, permite a navegação para a página de nova despesa
-            window.location.href = 'new-expense.html';
-        } else {
-            // Caso contrário, exibe uma mensagem pedindo para cadastrar um budget
-            alert("Por favor, cadastre um orçamento antes de adicionar uma nova despesa.");
-        }
-    }
+        function checkBudgetBeforeRedirect() {
+            const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
 
-document.addEventListener('DOMContentLoaded', () => {
-        const selectMoeda = document.getElementById('moeda');
-        selectMoeda.addEventListener('change', updateTableValues);
-
-        // Chama updateTableValues ao carregar a página
-        updateTableValues();
-    });
-
-    async function updateTableValues() {
-    const moedaSelecionada = document.getElementById('moeda').value;
-    const budget = getBudget();
-    const expenses = getExpenses();
-
-    // Calcula o total das despesas, multiplicando o valor de cada despesa pela sua quantidade
-    let totalExpenses = expenses.reduce((acc, exp) => acc + (exp.valor * exp.quantidade), 0);
-
-    // Converte o orçamento e as despesas para a moeda selecionada
-    const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
-    const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
-
-    // Calcula o saldo
-    const balance = budgetConverted - expensesConverted;
-
-    // Atualiza a tabela com os valores convertidos
-    document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
-    document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
-    document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
-}
-
-
-    // Função para obter o orçamento do localStorage
-    function getBudget() {
-        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
-        return budgets[0] || { valor: 0, moeda: "BRL" };  // Retorna o primeiro budget ou um default
-    }
-
-    // Função para obter as despesas do localStorage
-    function getExpenses() {
-        return JSON.parse(localStorage.getItem('expenses')) || [];
-    }
-
-    // Função fictícia de conversão de moeda
-    async function convertCurrency(amount, fromCurrency, toCurrency) {
-    if (fromCurrency === toCurrency) return amount;
-
-    const apiKey = 'edf7dd9bb7db93759e243c91'; 
-    const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.result === "success") {
-            const rate = data.conversion_rates[toCurrency];
-            if (rate) {
-                return amount * rate;
+            if (budgets.length > 0) {
+                // Se existe um budget, permite a navegação para a página de nova despesa
+                window.location.href = 'new-expense.html';
             } else {
-                console.error(`A moeda de destino ${toCurrency} não foi encontrada nas taxas de câmbio.`);
-                return amount; // Retorna o valor original se a moeda não for encontrada
+                // Caso contrário, exibe uma mensagem pedindo para cadastrar um budget
+                alert("Por favor, cadastre um orçamento antes de adicionar uma nova despesa.");
             }
-        } else {
-            console.error("Erro na resposta da API ExchangeRate-API:", data);
-            return amount; // Retorna o valor original em caso de erro
         }
-    } catch (error) {
-        console.error("Erro ao buscar as taxas de câmbio:", error);
-        return amount; // Retorna o valor original em caso de erro
-    }
-}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectMoeda = document.getElementById('moeda');
+            selectMoeda.addEventListener('change', updateTableValues);
+
+            // Chama updateTableValues ao carregar a página
+            updateTableValues();
+        });
+
+        async function updateTableValues() {
+            const moedaSelecionada = document.getElementById('moeda').value;
+            const budget = getBudget();
+            const expenses = getExpenses();
+
+            // Calcula o total das despesas, multiplicando o valor de cada despesa pela sua quantidade
+            let totalExpenses = expenses.reduce((acc, exp) => acc + (exp.valor * exp.quantidade), 0);
+
+            // Converte o orçamento e as despesas para a moeda selecionada
+            const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
+            const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
+
+            // Calcula o saldo
+            const balance = budgetConverted - expensesConverted;
+
+            // Atualiza a tabela com os valores convertidos
+            document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
+            document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
+            document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
+        }
+
+
+        // Função para obter o orçamento do localStorage
+        function getBudget() {
+            const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+            return budgets[0] || { valor: 0, moeda: "BRL" };  // Retorna o primeiro budget ou um default
+        }
+
+        // Função para obter as despesas do localStorage
+        function getExpenses() {
+            return JSON.parse(localStorage.getItem('expenses')) || [];
+        }
+
+        // Função fictícia de conversão de moeda
+        async function convertCurrency(amount, fromCurrency, toCurrency) {
+            if (fromCurrency === toCurrency) return amount;
+
+            const apiKey = 'edf7dd9bb7db93759e243c91';
+            const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.result === "success") {
+                    const rate = data.conversion_rates[toCurrency];
+                    if (rate) {
+                        return amount * rate;
+                    } else {
+                        console.error(`A moeda de destino ${toCurrency} não foi encontrada nas taxas de câmbio.`);
+                        return amount; // Retorna o valor original se a moeda não for encontrada
+                    }
+                } else {
+                    console.error("Erro na resposta da API ExchangeRate-API:", data);
+                    return amount; // Retorna o valor original em caso de erro
+                }
+            } catch (error) {
+                console.error("Erro ao buscar as taxas de câmbio:", error);
+                return amount; // Retorna o valor original em caso de erro
+            }
+        }
 
         function getExpensesFromLocalStorage() {
             const expenses = localStorage.getItem("expenses");
@@ -168,22 +167,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-
-        function deleteExpense(id) {
-            console.log("Deletar item com ID:", id); // Log para verificar o ID
-            if (confirm("Você tem certeza que deseja remover esta despesa?")) {
-                const expensesList = getExpensesFromLocalStorage().filter(exp => exp.id != id);
-                localStorage.setItem('expenses', JSON.stringify(expensesList)); // Atualiza o localStorage
-                document.getElementById(`card-${id}`).remove(); // Remove o card da interface
-            }
-        }
-
-
     </script>
     <script type="module" src="/src/js/app.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
+<footer>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Excluir despesa cadastrada?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Você tem certeza que deseja remover esta despesa?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <!-- Botão de confirmação de exclusão -->
+                    <button type="button" id="confirmarExclusao" class="btn btn-danger">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 
 </html>
