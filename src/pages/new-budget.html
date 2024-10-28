@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Budget</title>
+    <link rel="manifest" href="/assets/jsons/manifest.json">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="notification" class="notification"></div>
+    <div class="container">
+        <div class="form-wrapper">
+            <form id="form" class="form-left">
+                <h2>Cadastrar Budget</h2>
+
+                <div class="input_container">
+                    <label for="title" class="input_label">Descrição:</label>
+                    <input type="text" id="title" class="input_field" name="descricao"
+                        placeholder="Digite a descrição da despesa" required>
+                </div>
+
+                <div class="input_container">
+                    <label for="value" class="input_label">Valor:</label>
+                    <input type="number" class="input_field" id="value" name="valor" min="0.01" step="0.01"
+                        placeholder="Digite o valor" required>
+                </div>
+
+                <div class="input_container">
+                    <label for="moeda" class="input_label">Moeda de Destino:</label>
+                    <select id="moeda" class="input_field" name="moeda" required>
+                        <option value="">Selecione a moeda de destino</option>
+                        <option value="BRL">Real (BRL)</option>
+                        <option value="USD">Dólar Americano (USD)</option>
+                        <option value="EUR">Euro (EUR)</option>
+                        <option value="GBP">Libra Esterlina (GBP)</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="submit" class="purchase--btn">Cadastrar Budget</button>
+                <button type="button" id="submit" class="purchase--btn" onclick="window.location.href = 'index.html';">Voltar</button>
+
+            </form>
+
+            <div class="form-right">
+                <h1 class="titleFormRight">Porque cada <span class="highlight">viagem</span> conta</h1>
+                <p class="subtitleFormRight">Organize suas despesas de forma simples e eficiente. Cadastre suas
+                    despesas e tenha mais controle e tranquilidade durante sua aventura.</p>
+                <img src="/assets/svg/travel.svg" background="transparent" speed="1"
+                    style="width: 300px; justify-content: center;" />
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('form').addEventListener('submit', function (e) {
+            e.preventDefault();
+    
+            // Verifica se já existe um budget no localStorage
+            let budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+            
+            if (budgets.length > 0) {
+                alert("Você só pode cadastrar um orçamento.");
+                return;
+            }
+    
+            // Captura os valores do formulário
+            const descricao = document.getElementById('title').value;
+            const valor = parseFloat(document.getElementById('value').value);
+            const moeda = document.getElementById('moeda').value;
+    
+            // Cria o objeto budget
+            const budget = { descricao, valor, moeda };
+    
+            // Adiciona o budget ao localStorage
+            budgets.push(budget);
+            localStorage.setItem('budgets', JSON.stringify(budgets));
+    
+            // Limpa o formulário e redireciona
+            document.getElementById('form').reset();
+            window.location.href = 'index.html';
+        });
+    
+        document.addEventListener('DOMContentLoaded', displayBudgets);
+    </script>
+    
+</body>
+
+</html>

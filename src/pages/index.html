@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Despesas em Viagens</title>
+    <title>Lista de despesas cadastradas</title>
     <link rel="manifest" href="/assets/jsons/manifest.json">
     <link rel="stylesheet" href="/src/css/style.css">
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -14,86 +14,172 @@
 <body>
     <div id="notification" class="notification"></div>
     <div class="container">
-        <div class="form-wrapper">
-            <!-- Formulário na metade esquerda -->
-            <form id="form" class="form-left">
-                <h2>Cadastrar Despesas</h1>
-                    <p>Organize suas despesas de forma simples e eficiente. Cadastre suas despesas e tenha mais controle
-                        e tranquilidade durante sua aventura.</p>
+        <div class="expenses-list-wrapper">
+            <div style="margin-bottom: 10px; width: 100%; display: flex; align-items: center; gap: 10px;">
+                <button style="width: 150px; background-color: green; color: white;"
+                    onclick="window.location.href='new-budget.html'" class="purchase--btn">Budget</button>
+                    <button 
+                    style="width: 150px; background-color: red; color: white;" 
+                    onclick="checkBudgetBeforeRedirect()" 
+                    class="purchase--btn">Nova Despesa
+                </button>
+                
 
-                    <form id="form">
-                        <div class="input_container">
-                            <label for="title" class="input_label">Descrição:</label>
-                            <input type="text" id="title" class="input_field" name="descricao"
-                                placeholder="Digite a descrição da despesa" required>
-                        </div>
-
-                        <div class="input_container">
-                            <label for="quantity" class="input_label">Quantidade:</label>
-                            <input type="number" class="input_field" id="quantity" name="quantidade" min="1"
-                                placeholder="Digite a quantidade" required>
-                        </div>
-
-                        <div class="input_container">
-                            <label for="value" class="input_label">Valor:</label>
-                            <input type="number" class="input_field" id="value" name="valor" min="0.01" step="0.01"
-                                placeholder="Digite o valor" required>
-                        </div>
-
-                        <div class="input_container">
-                            <label for="date" class="input_label">Data:</label>
-                            <input id="date" class="input_field" type="date" required />
-                        </div>
-
-                        <div class="input_container">
-                            <label for="currencyOfOrigin" class="input_label">Moeda de Origem:</label>
-                            <select id="currencyOfOrigin" class="input_field" name="moeda_origem" required>
-                                <option value="">Selecione a moeda de origem</option>
-                                <option value="BRL">Real (BRL)</option>
-                                <option value="USD">Dólar Americano (USD)</option>
-                                <option value="EUR">Euro (EUR)</option>
-                                <option value="GBP">Libra Esterlina (GBP)</option>
-                            </select>
-                        </div>
-
-                        <div class="input_container">
-                            <label for="currencyToConvert" class="input_label">Moeda de Destino:</label>
-                            <select id="currencyToConvert" class="input_field" name="moeda_destino" required>
-                                <option value="">Selecione a moeda de destino</option>
-                                <option value="BRL">Real (BRL)</option>
-                                <option value="USD">Dólar Americano (USD)</option>
-                                <option value="EUR">Euro (EUR)</option>
-                                <option value="GBP">Libra Esterlina (GBP)</option>
-                            </select>
-                        </div>
-
-                        <div class="input_container">
-                            <label for="category" class="input_label">Categoria:</label>
-                            <select id="category" class="input_field" name="moeda_destino" required>
-                                <option value="">Selecione a categoria</option>
-                                <option value="Alimentação">Alimentação</option>
-                                <option value="Transporte">Transporte</option>
-                                <option value="Hospedagem">Hospedagem</option>
-                                <option value="Lazer">Lazer</option>
-                                <option value="Outros">Outros</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" id="submit" class="purchase--btn">Cadastrar Despesa</button>
-                        <button onclick="window.location.href='expenses-list.html'" class="purchase--btn">Despesas cadastradas</button>
-                    </form>
-
-                    <div class="form-right">
-                        <h1 class="titleFormRight">Porque cada <span class="highlight">viagem</span> conta</h1>
-                        <p class="subtitleFormRight">Organize suas despesas de forma simples e eficiente. Cadastre suas
-                            despesas e tenha mais controle e tranquilidade durante sua aventura.</p>
-                        <img src="/assets/svg/travel.svg" background="transparent" speed="1"
-                            style="width: 300px; justify-content: center;" />
+                <div class="input_container" style="margin-top: 0;">
+                    <label for="moeda" class="input_label">Moeda de Visualização:</label>
+                    <select id="moeda" class="input_field" name="moeda" required>
+                        <option value="">Selecione a moeda visualização</option>
+                        <option value="BRL" selected>Real (BRL)</option>
+                        <option value="USD">Dólar Americano (USD)</option>
+                        <option value="EUR">Euro (EUR)</option>
+                        <option value="GBP">Libra Esterlina (GBP)</option>
+                    </select>
+                </div>
+            </div>
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Budget</th>
+                        <th scope="col">Despesas Totais</th>
+                        <th scope="col">Balanço</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th id="total-budget">0 R$</th>
+                        <th id="total-expenses">0 R$</th>
+                        <th id="balance">0 R$</th>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+                    <div id="form" class="expenses-center">
+                        <h2 style="margin-bottom: 30px;">Despesas cadastradas</h1>
+                            <div class="container">
+                                <div id="cards-container"></div>
+                            </div>
                     </div>
+                </div>
+            </div>
+
         </div>
-        </form>
     </div>
 
+
+    <script>
+
+function checkBudgetBeforeRedirect() {
+        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+        
+        if (budgets.length > 0) {
+            // Se existe um budget, permite a navegação para a página de nova despesa
+            window.location.href = 'new-expense.html';
+        } else {
+            // Caso contrário, exibe uma mensagem pedindo para cadastrar um budget
+            alert("Por favor, cadastre um orçamento antes de adicionar uma nova despesa.");
+        }
+    }
+
+document.addEventListener('DOMContentLoaded', () => {
+        const selectMoeda = document.getElementById('moeda');
+        selectMoeda.addEventListener('change', updateTableValues);
+
+        // Chama updateTableValues ao carregar a página
+        updateTableValues();
+    });
+
+    async function updateTableValues() {
+    const moedaSelecionada = document.getElementById('moeda').value;
+    const budget = getBudget();
+    const expenses = getExpenses();
+
+    // Calcula o total das despesas, multiplicando o valor de cada despesa pela sua quantidade
+    let totalExpenses = expenses.reduce((acc, exp) => acc + (exp.valor * exp.quantidade), 0);
+
+    // Converte o orçamento e as despesas para a moeda selecionada
+    const budgetConverted = await convertCurrency(budget.valor, budget.moeda, moedaSelecionada);
+    const expensesConverted = await convertCurrency(totalExpenses, expenses[0]?.moedaOrigem || "BRL", moedaSelecionada);
+
+    // Calcula o saldo
+    const balance = budgetConverted - expensesConverted;
+
+    // Atualiza a tabela com os valores convertidos
+    document.getElementById('total-budget').innerText = `${budgetConverted.toFixed(2)} ${moedaSelecionada}`;
+    document.getElementById('total-expenses').innerText = `${expensesConverted.toFixed(2)} ${moedaSelecionada}`;
+    document.getElementById('balance').innerText = `${balance.toFixed(2)} ${moedaSelecionada}`;
+}
+
+
+    // Função para obter o orçamento do localStorage
+    function getBudget() {
+        const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+        return budgets[0] || { valor: 0, moeda: "BRL" };  // Retorna o primeiro budget ou um default
+    }
+
+    // Função para obter as despesas do localStorage
+    function getExpenses() {
+        return JSON.parse(localStorage.getItem('expenses')) || [];
+    }
+
+    // Função fictícia de conversão de moeda
+    async function convertCurrency(amount, fromCurrency, toCurrency) {
+    if (fromCurrency === toCurrency) return amount;
+
+    const apiKey = 'edf7dd9bb7db93759e243c91'; 
+    const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.result === "success") {
+            const rate = data.conversion_rates[toCurrency];
+            if (rate) {
+                return amount * rate;
+            } else {
+                console.error(`A moeda de destino ${toCurrency} não foi encontrada nas taxas de câmbio.`);
+                return amount; // Retorna o valor original se a moeda não for encontrada
+            }
+        } else {
+            console.error("Erro na resposta da API ExchangeRate-API:", data);
+            return amount; // Retorna o valor original em caso de erro
+        }
+    } catch (error) {
+        console.error("Erro ao buscar as taxas de câmbio:", error);
+        return amount; // Retorna o valor original em caso de erro
+    }
+}
+
+        function getExpensesFromLocalStorage() {
+            const expenses = localStorage.getItem("expenses");
+            return expenses ? JSON.parse(expenses) : [];
+        }
+
+
+        function editExpense(id) {
+            console.log("Editar item com ID:", id); // Log para verificar o ID
+            const expensesList = getExpensesFromLocalStorage();
+            const expense = expensesList.find(exp => exp.id == id);
+
+            if (expense) {
+                localStorage.setItem('edit', JSON.stringify(expense)); // Salva a despesa a ser editada
+                window.location.href = 'new-expense.html'; // Redireciona para a página de edição
+            }
+        }
+
+
+        function deleteExpense(id) {
+            console.log("Deletar item com ID:", id); // Log para verificar o ID
+            if (confirm("Você tem certeza que deseja remover esta despesa?")) {
+                const expensesList = getExpensesFromLocalStorage().filter(exp => exp.id != id);
+                localStorage.setItem('expenses', JSON.stringify(expensesList)); // Atualiza o localStorage
+                document.getElementById(`card-${id}`).remove(); // Remove o card da interface
+            }
+        }
+
+
+    </script>
     <script type="module" src="/src/js/app.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

@@ -86,6 +86,13 @@
   font-weight: 500;
 }
 
+
+.card {
+  width: 100%;
+  max-width: 100%;
+}
+
+
 .input_field {
   width: auto;
   height: 40px;
