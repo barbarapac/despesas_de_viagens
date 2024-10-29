@@ -1,11 +1,27 @@
-function saveExpensesToLocalStorage(expenses) {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-}
 
-function removeExpenseFromLocalStorage(id) {
-    const expenses = getExpensesFromLocalStorage();
-    const updatedExpenses = expenses.filter(expense => expense.id !== id);
-    saveExpensesToLocalStorage(updatedExpenses);
+
+
+// Evento para capturar o valor do data-id ao abrir o modal
+$('#exampleModalCenter').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Botão que acionou o modal
+    var expenseId = button.data('id'); // Obtém o valor do data-id
+
+    // Define o ID da despesa no botão de confirmação
+    $('#confirmarExclusao').data('id', expenseId);
+});
+
+// Função de exclusão
+$('#confirmarExclusao').click(function () {
+    var expenseId = $(this).data('id'); // Recupera o ID da despesa do botão de confirmação
+    deleteExpense(expenseId); // Chama a função de exclusão passando o ID
+    $('#exampleModalCenter').modal('hide'); // Fecha o modal
+});
+
+function deleteExpense(id) {
+    console.log("Deletar item com ID:", id); // Log para verificar o ID
+    const expensesList = getExpensesFromLocalStorage().filter(exp => exp.id != id);
+    localStorage.setItem('expenses', JSON.stringify(expensesList)); // Atualiza o localStorage
+    document.getElementById(`card-${id}`).remove(); // Remove o card da interface
 }
 
 
@@ -17,7 +33,7 @@ function getExpensesFromLocalStorage() {
 
 function displayBudgets() {
     const budgetsUl = document.getElementById('budgets-ul');
-    budgetsUl.innerHTML = ''; 
+    budgetsUl.innerHTML = '';
 
     const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
 
@@ -28,29 +44,6 @@ function displayBudgets() {
         budgetsUl.appendChild(li);
     });
 }
-
-function createCardTemplate(item) {
-
-    console.log(item)
-    return `
-        <div class="card show" id="card-${item.id}" style="width: 100%; max-width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: larger;"><strong>${item.descricao}</strong></label>
-                <div class="d-inline-flex align-items-top">
-                    <button class="btn btn-primary" onclick="editExpense('${item.id}')" title="Editar item">Editar</button>
-                    <button class="btn btn-danger" onclick="deleteExpense('${item.id}')" title="Deletar item">Deletar</button>
-                </div>
-            </div>
-            <div class="divider"></div>
-            ${createCardDetails(item)}
-        </div>
-    `;
-}
-
-// Função para editar a despesa
-
-// Função para deletar a despesa
-
 
 
 async function createCardDetails(item) {
@@ -103,7 +96,9 @@ async function renderCards() {
                   <label style="font-size: larger;"><strong>${item.descricao}</strong></label>
                   <div class="d-inline-flex align-items-top">
                       <button class="btn btn-primary" onclick="editExpense('${item.id}')" title="Editar item">Editar</button>
-                      <button class="btn btn-danger" onclick="deleteExpense('${item.id}')" title="Deletar item">Deletar</button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModalCenter" data-id='${item.id}'>
+                            Deletar
+                        </button>
                   </div>
               </div>
               <div class="divider"></div>
@@ -118,7 +113,7 @@ async function renderCards() {
 async function convertCurrency(amount, fromCurrency, toCurrency) {
     if (fromCurrency === toCurrency) return amount;
 
-    const apiKey = 'edf7dd9bb7db93759e243c91'; 
+    const apiKey = 'edf7dd9bb7db93759e243c91';
     const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
 
     try {
@@ -140,43 +135,6 @@ async function convertCurrency(amount, fromCurrency, toCurrency) {
     } catch (error) {
         console.error("Erro ao buscar as taxas de câmbio:", error);
         return amount; // Retorna o valor original em caso de erro
-    }
-}
-
-
-
-function addCardInteractions() {
-    document.querySelectorAll("lottie-player").forEach(player => {
-        player.addEventListener("click", (event) => {
-            const dataId = event.target.getAttribute("data-id");
-            const action = dataId.split('-')[0];
-            const id = dataId.split('-')[1];
-            
-            if (action === 'delete') {
-                animateRemoval(id);
-            } else if (action === 'edit') {
-                window.location.href = 'new-expense.html';
-                const expensesList = getExpensesFromLocalStorage();
-                const expense = expensesList.find(exp => exp.id == id);
-                
-                if (expense) {
-                    localStorage.setItem('edit', JSON.stringify(expense));
-                    document.getElementById('submit').innerText = "Editar Despesa";
-                }
-            }
-        });
-    });
-}
-
-function animateRemoval(id) {
-    const card = document.getElementById(`card-${id}`);
-    if (confirm("Você tem certeza que deseja remover esta despesa?")) {
-        if (card) {
-            card.classList.add("hide");
-            card.ontransitionend = () => removeExpenseFromLocalStorage(id);
-            card.remove();
-            showNotification(`Despesa removida com sucesso!`);
-        }
     }
 }
 
