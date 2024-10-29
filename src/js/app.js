@@ -17,6 +17,30 @@ $('#confirmarExclusao').click(function () {
     $('#exampleModalCenter').modal('hide'); // Fecha o modal
 });
 
+$('#searchButton').click(function () {
+    const searchInput = $('#searchInput').val();
+    renderCards(searchInput);
+});
+
+$('#cleanSearch').click(function () {
+    $('#searchInput').val('');
+    renderCards();
+});
+
+
+$('#searchInput').on('input', debounce(() => {
+    const searchInput = $('#searchInput').val();
+    renderCards(searchInput);
+}, 300));
+
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 function deleteExpense(id) {
     console.log("Deletar item com ID:", id); // Log para verificar o ID
     const expensesList = getExpensesFromLocalStorage().filter(exp => exp.id != id);
@@ -77,17 +101,22 @@ async function createCardDetails(item) {
 }
 
 // Atualização da função renderCards para lidar com a função assíncrona createCardDetails
-async function renderCards() {
+async function renderCards(filter = "") {
     const container = document.getElementById("cards-container");
     container.innerHTML = "";
 
-    const expensesList = getExpenses();
+    let expensesList = getExpenses();
 
     if (expensesList.length === 0) {
         container.innerHTML = '<p>Nenhuma despesa registrada.</p>';
         return;
     }
 
+    if (filter.length > 0) {
+        expensesList = expensesList.filter(exp => exp.descricao.toLowerCase().includes(filter.toLowerCase()));
+    }
+
+    container.innerHTML = "";
     for (const item of expensesList) {
         const cardDetails = await createCardDetails(item);
         const cardTemplate = `
