@@ -50,15 +50,27 @@
                     </tr>
                 </tbody>
             </table>
-
+            
             <div class="card" style="width: 100%;">
-                <div class="card-body">
-                    <div id="form" class="expenses-center">
-                        <h2 style="margin-bottom: 30px;">Despesas cadastradas</h1>
-                            <div class="container">
-                                <div id="cards-container"></div>
+
+                <div id="form">
+                    <h2 style="margin-bottom: 30px;">Despesas cadastradas</h2>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="input-group">
+                                <input type="text" id="searchInput" class="form-control"
+                                    placeholder="Pesquisar despesas...">
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" id="cleanSearch" type="button">Limpar</button>
+                                    <!-- <button class="btn btn-primary" id="searchButton" type="button">Pesquisar</button> -->
+                                </div>
                             </div>
+                        </div>
                     </div>
+                    <br>
+
+                    <div id="cards-container"></div>
                 </div>
             </div>
 
